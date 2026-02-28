@@ -5,8 +5,6 @@
 //  Created by MRN7BAN on 20/09/25.
 //
 
-// ChatPageView.swift
-// ChatPageView.swift
 import SwiftUI
 
 struct ChatPageView: View {
@@ -19,7 +17,7 @@ struct ChatPageView: View {
             VStack(spacing: 4) {
                 Text("Fixe Support")
                     .font(.headline)
-                    .foregroundColor(.primary)
+                    .foregroundColor(Color.hcTextPrimary)
                 
                 if viewModel.isOrderComplete {
                     Text("✓ Order Complete")
@@ -33,8 +31,8 @@ struct ChatPageView: View {
             }
             .padding()
             .frame(maxWidth: .infinity)
-            .background(Color(.systemBackground))
-            .shadow(color: .black.opacity(0.1), radius: 2, y: 1)
+            .background(Color.white)
+            .shadow(color: .black.opacity(0.05), radius: 3, y: 1)
             
             // Messages
             ScrollViewReader { proxy in
@@ -57,7 +55,6 @@ struct ChatPageView: View {
                     .padding()
                 }
                 .onChange(of: viewModel.messages.count) { _ in
-                    // Auto-scroll to latest message
                     if let lastMessage = viewModel.messages.last {
                         withAnimation {
                             proxy.scrollTo(lastMessage.id, anchor: .bottom)
@@ -75,7 +72,7 @@ struct ChatPageView: View {
                         .font(.body)
                         .foregroundColor(.primary)
                         .padding(12)
-                        .background(Color.gray.opacity(0.1))
+                        .background(Color.hcBackground)
                         .cornerRadius(20)
                         .focused($isInputFocused)
                         .onSubmit {
@@ -95,7 +92,7 @@ struct ChatPageView: View {
                             .frame(width: 44, height: 44)
                             .background(
                                 Circle()
-                                    .fill(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading || viewModel.isOrderComplete ? Color.gray : Color.accentColor)
+                                    .fill(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading || viewModel.isOrderComplete ? Color.gray.opacity(0.4) : Color.hcBlue)
                             )
                     }
                     .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading || viewModel.isOrderComplete)
@@ -103,7 +100,7 @@ struct ChatPageView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 8)
             }
-            .background(Color(.systemBackground))
+            .background(Color.white)
             
             // Reset button if order is complete
             if viewModel.isOrderComplete {
@@ -115,12 +112,19 @@ struct ChatPageView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.accentColor)
-                        .cornerRadius(12)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.hcBlue, Color.hcBlueLight],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            .cornerRadius(12)
+                        )
                 }
                 .padding()
             }
         }
+        .background(Color.hcBackground)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -138,7 +142,13 @@ struct MessageBubble: View {
                         .font(.body)
                         .foregroundColor(.white)
                         .padding(12)
-                        .background(Color.accentColor)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.hcBlue, Color.hcBlueLight],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                         .cornerRadius(16, corners: [.topLeft, .topRight, .bottomLeft])
                     
                     Text(message.timestamp.formatted(date: .omitted, time: .shortened))
@@ -150,10 +160,11 @@ struct MessageBubble: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(message.text)
                         .font(.body)
-                        .foregroundColor(.primary)
+                        .foregroundColor(Color.hcTextPrimary)
                         .padding(12)
-                        .background(Color.gray.opacity(0.15))
+                        .background(Color.white)
                         .cornerRadius(16, corners: [.topLeft, .topRight, .bottomRight])
+                        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
                     
                     Text(message.timestamp.formatted(date: .omitted, time: .shortened))
                         .font(.caption2)
@@ -174,14 +185,15 @@ struct TypingIndicator: View {
         HStack(spacing: 4) {
             ForEach(0..<3) { index in
                 Circle()
-                    .fill(Color.gray)
+                    .fill(Color.hcBlue)
                     .frame(width: 8, height: 8)
                     .opacity(numberOfDots > index ? 1 : 0.3)
             }
         }
         .padding(12)
-        .background(Color.gray.opacity(0.15))
+        .background(Color.white)
         .cornerRadius(16)
+        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
         .onAppear {
             withAnimation(Animation.easeInOut(duration: 0.6).repeatForever()) {
                 numberOfDots = 3

@@ -13,24 +13,51 @@ struct HomeTile: View {
     
     var body: some View {
         VStack(spacing: 10) {
+            // Circular icon
             Image(systemName: icon)
-                .font(.title)
-                .fontWeight(.light)
-                .foregroundStyle(Color.black)
-                .padding()
-                .background { Circle().fill(Color.white) }
-            
-            Text(title)
                 .font(.title3)
-                .kerning(0.5)
                 .fontWeight(.medium)
-                .foregroundStyle(Color.secondaryColor)
+                .foregroundStyle(.white)
+                .frame(width: 64, height: 64)
+                .background(
+                    LinearGradient(
+                        colors: [Color.hcBlueLight.opacity(0.3), Color.hcBlue.opacity(0.15)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    Circle()
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [Color.hcBlue, Color.hcBlueLight],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2
+                        )
+                )
+                .clipShape(Circle())
+                .shadow(color: Color.hcBlue.opacity(0.15), radius: 6, y: 3)
+            
+            // Label
+            Text(title)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundStyle(Color.hcTextPrimary)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .aspectRatio(1, contentMode: .fit)
-        .background(
-            RoundedRectangle(cornerRadius: 24)
-                .fill(Color.accentColor.opacity(0.9))
-        )
+        .frame(width: 80)
     }
+}
+
+#Preview {
+    HStack(spacing: 24) {
+        HomeTile(icon: "wrench.and.screwdriver.fill", title: "Service")
+        HomeTile(icon: "clock.arrow.circlepath", title: "History")
+        HomeTile(icon: "washer.fill", title: "Products")
+        HomeTile(icon: "tag.fill", title: "Offers")
+    }
+    .padding()
 }

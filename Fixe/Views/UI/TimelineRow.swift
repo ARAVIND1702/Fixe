@@ -16,31 +16,32 @@ struct TimelineRow: View {
             // Left Timeline with Dot/Line
             VStack {
                 Circle()
-                    .frame(width: 12, height: 12)
+                    .frame(width: 14, height: 14)
                     .overlay(
                         Circle()
-                            .fill(stage.isCompleted ? .accent : .white)
-                            .stroke(Color.accent, lineWidth: 2)
+                            .fill(stage.isCompleted ? Color.hcBlue : .white)
+                            .stroke(Color.hcBlue, lineWidth: 2)
                     )
                 if !isLast {
                     Rectangle()
                         .frame(width: 2)
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(Color.hcBlue.opacity(0.4))
                         .padding(.top, -2)
                 }
             }
 
-            //Right Content
+            // Right Content
             VStack(alignment: .leading, spacing: 4) {
                 Text(stage.date)
                     .font(.caption)
-                    .foregroundColor(.accent)
+                    .foregroundColor(Color.hcBlue)
                 Text(stage.title)
                     .font(.headline)
+                    .foregroundStyle(Color.hcTextPrimary)
                 if let subtitle = stage.subtitle {
                     Text(subtitle)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.hcTextSecondary)
                 }
             }
             .padding(.leading, 8)

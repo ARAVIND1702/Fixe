@@ -13,7 +13,7 @@ class ServiceHistoryViewModel: ObservableObject {
     private let firebaseService = FirebaseService()
     
     func fetchServiceOrder(){
-        let userId = "User123"
+        let userId = SessionManager.shared.userId
         firebaseService.fetchOrdersForUser(userId: userId) { [weak self] fetchedOrders in
             DispatchQueue.main.async {
                 self?.orders = fetchedOrders

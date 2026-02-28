@@ -11,8 +11,13 @@ struct TabPageView: View {
     @State var selectedTab = 0
     
     init() {
-        UITabBar.appearance().backgroundColor = UIColor.white
-        UITabBar.appearance().standardAppearance.shadowColor = UIColor.black
+        // HC-style clean white tab bar
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.white
+        appearance.shadowColor = UIColor.black.withAlphaComponent(0.08)
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
     }
     
     var body: some View {
@@ -23,7 +28,7 @@ struct TabPageView: View {
                     .navigationBarHidden(true)
             }
             .tabItem {
-                Image(systemName: "house")
+                Image(systemName: "homekit")
                 Text("Home")
             }
             
@@ -32,12 +37,12 @@ struct TabPageView: View {
                     .navigationBarHidden(true)
             }
             .tabItem {
-                Image(systemName: "bubble")
+                Image(systemName: "bubble.left.and.bubble.right")
                 Text("Chat")
             }
             
             NavigationStack {
-                Text("Settings")
+                SettingsPageView()
                     .navigationBarHidden(true)
             }
             .tabItem {
@@ -45,6 +50,7 @@ struct TabPageView: View {
                 Text("Settings")
             }
         }
+        .tint(Color.hcBlue)
     }
 }
 

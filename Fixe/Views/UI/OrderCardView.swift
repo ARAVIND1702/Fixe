@@ -12,45 +12,49 @@ struct OrderCardView: View {
     var order: ServiceOrder
     
     var body: some View {
-        HStack(alignment: .center){
-            Spacer()
+        HStack(alignment: .center, spacing: 14) {
             Image(.washingMachine)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 35)
-                .padding(.vertical,10)
-                .padding(.horizontal,14)
-                .background{
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(.accent.tertiary)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 14)
+                .background {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.hcBlue.opacity(0.1))
                 }
-                .padding()
-            VStack(alignment: .leading){
+            
+            VStack(alignment: .leading, spacing: 4) {
                 Text(order.eNumber)
-                    .fontWeight(.bold)
-                Text("Case ID: \(order.id.prefix(6))")              .font(.subheadline)
-                    .foregroundStyle(.accent)
-                Text("Request Cancellation | Status: \(order.status ?? "Unknown")")
+                    .font(.headline)
+                    .foregroundStyle(Color.hcTextPrimary)
+                Text("Case ID: \(order.id.prefix(6))")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.hcBlue)
+                Text("Status: \(order.status ?? "Unknown")")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fontWeight(.light)
+                    .foregroundStyle(Color.hcTextSecondary)
             }
+            
             Spacer()
-            Spacer()
-            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(Color.hcTextSecondary)
         }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.06), radius: 6, y: 2)
+        )
+        .padding(.horizontal)
+        .padding(.bottom, 8)
     }
 }
 
 #Preview {
-    var stages: [ServiceStage] = [
-        ServiceStage(date: "21/07/2023 09:40", title: "Case Registered", subtitle: "Issue - Beeping Sound", isCompleted: true),
-        ServiceStage(date: "22/07/2023 10:40", title: "Allocated", subtitle: "Delhi NCR Branch", isCompleted: true),
-        ServiceStage(date: "22/07/2023 01:40", title: "Engineer Assigned", subtitle: "Mohan Singh", isCompleted: true),
-        ServiceStage(date: "22/07/2023 04:00", title: "OTP Received", subtitle: "3 4 3 2", isCompleted: true),
-        ServiceStage(date: "23/07/2023 09:40", title: "Case Closed", subtitle: nil, isCompleted: true)
-    ]
-        var order: ServiceOrder = ServiceOrder(applianceType: "Washer", brand: "Bosch", eNumber: "SX658X03JE/01", problemDescription: "Sound while rotating", serviceType: "Genral", preferredDate: "23 Oct 2021", preferredTime: "2:33 PM", customerName: "Aravind", customerPhone: "7904175498", customerAddress: "H4 GCT OLD Staff Quartes, Madurai", status: "Pending", urgency: "High", stages: stages)
+    var order: ServiceOrder = ServiceOrder(applianceType: "Washer", brand: "Bosch", eNumber: "SX658X03JE/01", problemDescription: "Sound while rotating", serviceType: "Genral", preferredDate: "23 Oct 2021", preferredTime: "2:33 PM", customerName: "Aravind", customerPhone: "7904175498", customerAddress: "H4 GCT OLD Staff Quartes, Madurai", status: "Pending", urgency: "High")
     
     OrderCardView(order: order)
 }

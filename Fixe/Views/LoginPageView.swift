@@ -16,50 +16,55 @@ struct LoginPageView: View {
         NavigationStack {
             ZStack {
                 // MARK: - Background
-                LinearGradient(
-                    colors: [
-//                        Color.accentColor.opacity(0.15),
-                        Color(.systemBackground)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                Color.hcBackground
+                    .ignoresSafeArea()
                 
-                VStack {
-                    Spacer(minLength: 40)
-                    
-                    Image(systemName: "wrench.adjustable.fill")
-                        .font(.system(size: 74)) // Increase icon size
-                        .foregroundColor(.white) // Icon color
-                        .padding(12) // Space around icon
-                        .background(
-                            LinearGradient(
-                                colors: [
-                                    Color.accentColor.opacity(0.95),
-                                    Color.accentColor.opacity(0.75)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                            .cornerRadius(24) // Rounded background
+                VStack(spacing: 0) {
+                    // MARK: - Blue Gradient Hero
+                    ZStack {
+                        LinearGradient(
+                            colors: [Color.hcBlueDeep, Color.hcBlue, Color.hcBlueLight],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
-                        .shadow(radius: 2)
-
-                    // MARK: - Logo / Title
-                    VStack(spacing: 6) {
-                        Text("Fixe")
-                            .font(.system(size: 42, weight: .bold))
-                            .tracking(4)
-                            .foregroundStyle(Color.accentColor)
                         
-                        Text("B/S/H/")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                        // Subtle cloud/circle decorations
+                        Circle()
+                            .fill(Color.white.opacity(0.08))
+                            .frame(width: 200, height: 200)
+                            .offset(x: -100, y: -40)
                         
+                        Circle()
+                            .fill(Color.white.opacity(0.05))
+                            .frame(width: 300, height: 300)
+                            .offset(x: 120, y: 20)
+                        
+                        VStack(spacing: 8) {
+                            Image(systemName: "wrench.adjustable.fill")
+                                .font(.system(size: 48))
+                                .foregroundColor(.white.opacity(0.9))
+                            
+                            Text("Fixe")
+                                .font(.system(size: 38, weight: .bold))
+                                .tracking(3)
+                                .foregroundStyle(.white)
+                            
+                            Text("B/S/H/")
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.7))
+                            
+                            Text("Hello,\nlet's get started!")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 8)
+                        }
                     }
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom, 24)
+                    .frame(height: 300)
+                    .clipShape(
+                        RoundedCorner(radius: 32, corners: [.bottomLeft, .bottomRight])
+                    )
                     
                     // MARK: - Card
                     VStack(spacing: 20) {
@@ -69,47 +74,57 @@ struct LoginPageView: View {
                             // Username
                             HStack {
                                 Image(systemName: "person.fill")
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(Color.hcTextSecondary)
+                                    .frame(width: 20)
                                 TextField("Username", text: $viewModel.username)
                                     .textInputAutocapitalization(.never)
                                     .autocorrectionDisabled(true)
                             }
-                            .padding()
-                            .background(.thinMaterial)
-                            .cornerRadius(14)
+                            .padding(14)
+                            .background(Color.hcBackground)
+                            .cornerRadius(12)
                             
                             // Password
                             HStack {
                                 Image(systemName: "lock.fill")
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(Color.hcTextSecondary)
+                                    .frame(width: 20)
                                 SecureField("Password", text: $viewModel.password)
                             }
-                            .padding()
-                            .background(.thinMaterial)
-                            .cornerRadius(14)
+                            .padding(14)
+                            .background(Color.hcBackground)
+                            .cornerRadius(12)
                         }
                         
                         // MARK: - Login Button
                         Button(action: {
                             viewModel.login()
+                            if viewModel.isLoggedIn {
+                                navigateToHome = true
+                            }
                         }) {
                             Text("Login")
                                 .font(.headline)
                                 .fontWeight(.semibold)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
+                                .padding(.vertical, 16)
                                 .background(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .fill(Color.accentColor)
+                                    LinearGradient(
+                                        colors: [Color.hcBlue, Color.hcBlueLight],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                    .cornerRadius(14)
                                 )
                                 .foregroundStyle(.white)
-                                .shadow(radius: 4, y: 2)
+                                .shadow(color: Color.hcBlue.opacity(0.3), radius: 8, y: 4)
                         }
                         .buttonStyle(.plain)
                         
                         // MARK: - Continue Without Login
                         NavigationLink(destination: TabPageView(), isActive: $navigateToHome) {
                             Button(action: {
+                                viewModel.loginAsGuest()
                                 navigateToHome = true
                             }) {
                                 Text("Quick Fix")
@@ -118,29 +133,23 @@ struct LoginPageView: View {
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 14)
                                     .background(
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .fill(Color.accentColor.opacity(0.08))
+                                        RoundedRectangle(cornerRadius: 14)
+                                            .fill(Color.hcBlue.opacity(0.08))
                                     )
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .stroke(Color.accentColor.opacity(0.8), lineWidth: 1.2)
+                                        RoundedRectangle(cornerRadius: 14)
+                                            .stroke(Color.hcBlue.opacity(0.4), lineWidth: 1.2)
                                     )
-                                    .foregroundStyle(Color.accentColor)
+                                    .foregroundStyle(Color.hcBlue)
                             }
                             .buttonStyle(.plain)
-                            .padding(.top, 4)
                         }
-                        
-                       
-                        
                     }
-                    .padding(22)
-                    
-                    .padding(.horizontal, 24)
+                    .padding(24)
+                    .padding(.top, 8)
                     
                     Spacer()
                 }
-                .padding(.bottom, 20)
             }
             .navigationBarBackButtonHidden()
             .ignoresSafeArea(.keyboard)

@@ -23,6 +23,7 @@ final class LoginPageViewModel: ObservableObject {
 
         // Replace with real authentication logic
         if username == "test" && password == "1234" {
+            SessionManager.shared.login(username: username)
             isLoggedIn = true
             errorMessage = nil
         } else {
@@ -30,10 +31,16 @@ final class LoginPageViewModel: ObservableObject {
             errorMessage = "Invalid credentials"
         }
     }
+    
+    func loginAsGuest() {
+        SessionManager.shared.loginAsGuest()
+        isLoggedIn = true
+    }
 
     func logout() {
         username = ""
         password = ""
         isLoggedIn = false
+        SessionManager.shared.logout()
     }
 }

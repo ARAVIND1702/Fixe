@@ -13,97 +13,120 @@ class ServiceRequestViewModel: ObservableObject {
         brand: "",
         eNumber: "",
         problemDescription: "",
-        serviceType: "repair",
+        serviceType: "Repair",
         preferredDate: "",
         preferredTime: "",
         customerName: "",
         customerPhone: "",
         customerAddress: "",
         status: "pending",
-        urgency: "medium",
-        stages: []
+        urgency: nil
     )
     
     @Published var savedOrders: [ServiceOrder] = []
     
-
+    // MARK: - Slot-based scheduling
+    @Published var selectedDay: Date = Date()
+    @Published var selectedSlot: TimeSlot? = nil
     
-   var selectedDate: Date = Date(){
-       didSet {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-            order.preferredDate = dateFormatter.string(from: selectedDate)
+    /// Generate available time slots for a given day (Outlook-style)
+    func availableSlots(for date: Date) -> [TimeSlot] {
+        let calendar = Calendar.current
+        let isToday = calendar.isDateInToday(date)
+        let currentHour = calendar.component(.hour, from: Date())
+        
+        // Slots from 9 AM to 6 PM, 1-hour blocks
+        let slotDefinitions: [(start: Int, end: Int)] = [
+            (9, 10), (10, 11), (11, 12),
+            (12, 13), (13, 14), (14, 15),
+            (15, 16), (16, 17), (17, 18)
+        ]
+        
+        return slotDefinitions.compactMap { slot in
+            // Skip past slots if today
+            if isToday && slot.start <= currentHour {
+                return nil
+            }
             
-            let timeFormatter = DateFormatter()
-            timeFormatter.dateFormat = "HH:mm"
-            order.preferredTime = timeFormatter.string(from: selectedDate)
+            let startTime = formatHour(slot.start)
+            let endTime = formatHour(slot.end)
+            
+            return TimeSlot(
+                id: "\(slot.start)-\(slot.end)",
+                startHour: slot.start,
+                endHour: slot.end,
+                label: "\(startTime) – \(endTime)",
+                isAvailable: true
+            )
+        }
+    }
+    
+    /// Get the next 7 days for day selection
+    var availableDays: [Date] {
+        let calendar = Calendar.current
+        return (0..<7).compactMap { offset in
+            calendar.date(byAdding: .day, value: offset, to: Date())
+        }
+    }
+    
+    private func formatHour(_ hour: Int) -> String {
+        let period = hour >= 12 ? "PM" : "AM"
+        let displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour)
+        return "\(displayHour):00 \(period)"
+    }
+    
+    /// Update the order's preferred date and time from the selected slot
+    func applySelectedSlot() {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        order.preferredDate = dateFormatter.string(from: selectedDay)
+        
+        if let slot = selectedSlot {
+            order.preferredTime = slot.label
         }
     }
     
     func initializeServiceStages() {
         let now = Date()
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm" // or customize format if needed
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
         let dateString = dateFormatter.string(from: now)
+        
+        let subtitle = order.serviceType == "General Checkup"
+            ? "General Checkup"
+            : order.problemDescription
         
         let stage = ServiceStage(
             date: dateString,
             title: "Case Registered",
-            subtitle: order.problemDescription,
+            subtitle: subtitle,
             isCompleted: false
         )
         order.stages = [stage]
-//        order.stages = [
-//            ServiceStage(date: "21/07/2023 09:40", title: "Case Registered", subtitle: "Issue - Beeping Sound", isCompleted: true),
-//            ServiceStage(date: "22/07/2023 10:40", title: "Allocated", subtitle: "Delhi NCR Branch", isCompleted: true),
-//            ServiceStage(date: "22/07/2023 01:40", title: "Engineer Assigned", subtitle: "Mohan Singh", isCompleted: true),
-//            ServiceStage(date: "22/07/2023 04:00", title: "OTP Received", subtitle: "3 4 3 2", isCompleted: true),
-//            ServiceStage(date: "23/07/2023 09:40", title: "Case Closed", subtitle: nil, isCompleted: true)
-//        ]
     }
-
-    
-//    func submitOrder() async -> Bool {
-//        guard let url = URL(string: "http://localhost:8080/createConfirmedOrder") else { return false }
-//        
-//        do {
-//            var request = URLRequest(url: url)
-//            request.httpMethod = "POST"
-//            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//            
-//            let jsonData = try JSONEncoder().encode(order)
-//            request.httpBody = jsonData
-//            
-//            let (_, response) = try await URLSession.shared.data(for: request)
-//            
-//            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-//                return true
-//            }
-//        } catch {
-//            print("Error submitting order:", error)
-//        }
-//        return false
-//    }
     
     func isFormValid() -> Bool {
-        return !order.applianceType.isEmpty &&
+        let baseValid = !order.applianceType.isEmpty &&
                !order.brand.isEmpty &&
-               !order.problemDescription.isEmpty &&
                !order.customerName.isEmpty &&
-        !order.customerPhone.isEmpty &&
+               !order.customerPhone.isEmpty &&
                !order.customerAddress.isEmpty &&
-               !order.preferredDate.isEmpty &&
-               !order.preferredTime.isEmpty
+               selectedSlot != nil
+        
+        if order.serviceType == "Repair" {
+            return baseValid && !order.problemDescription.isEmpty
+        }
+        return baseValid
     }
     
-
     func saveToHistory() async -> Bool {
+        applySelectedSlot()
         return await submitOrderToFirebase()
     }
     
     func submitOrderToFirebase() async -> Bool {
         let firebaseService = FirebaseService()
-        let userId = "User123" // Use actual userId (from Auth or locally)
+        let userId = SessionManager.shared.userId
         
         return await withCheckedContinuation { continuation in
             firebaseService.addOrderForUser(userId: userId, order: order) { success in
@@ -126,9 +149,18 @@ class ServiceRequestViewModel: ObservableObject {
         order.preferredDate = ""
         order.preferredTime = ""
         order.eNumber = ""
-        order.serviceType = ""
-        order.urgency = ""
+        order.serviceType = "Repair"
+        order.urgency = nil
+        selectedSlot = nil
+        selectedDay = Date()
     }
-    
-    
+}
+
+// MARK: - TimeSlot Model
+struct TimeSlot: Identifiable, Equatable {
+    let id: String
+    let startHour: Int
+    let endHour: Int
+    let label: String
+    let isAvailable: Bool
 }
